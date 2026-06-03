@@ -83,6 +83,7 @@ const emptyTeam = {
   headerSwap: false, // ヘッダーの左右入れ替え（false=テキスト左/ロゴ右、true=ロゴ左/テキスト右）
   teamName: '',
   teamReading: '',
+  foundedDate: '',   // 結成日（'YYYY-MM' 形式）
   members: Array(MEMBER_SLOTS).fill(null).map((_, i) => ({
     ...emptyMember(), role: i === 0 ? 'leader' : 'player',
   })),
@@ -243,6 +244,17 @@ async function drawCard(canvas, team) {
 
   // テキストブロック：CRYSTAL CONFLICT ＋ チーム名 ＋ 読み方
   txt('CRYSTAL CONFLICT', textAnchorX, 32, "600 10px 'Oswald'", f.textSub, textAlignSide)
+  // 結成日（CRYSTAL CONFLICT のラベル横に併記）
+  if (team.foundedDate) {
+    const foundedStr = `EST. ${fmtMonth(team.foundedDate)}`
+    ctx.font = "600 10px 'Oswald'"
+    const ccW = ctx.measureText('CRYSTAL CONFLICT').width
+    if (!swap) {
+      txt(foundedStr, textAnchorX + ccW + 12, 32, "600 10px 'Oswald'", f.textFaint, 'left')
+    } else {
+      txt(foundedStr, textAnchorX - ccW - 12, 32, "600 10px 'Oswald'", f.textFaint, 'right')
+    }
+  }
   const teamNameStr = team.teamName || 'TEAM NAME'
   ctx.font = "700 36px 'Oswald'"
   const tnW = Math.min(ctx.measureText(teamNameStr).width, W * 0.62)
@@ -424,10 +436,10 @@ function TeamForm({ initial, onSubmit }) {
     { v: 'manager', label: 'マネージャー' },
   ]
 
-  // 大会履歴の年月（年=2023〜今年 / 月=1〜12）
+  // 大会履歴の年月（年=2022〜今年 / 月=1〜12）
   const thisYear = new Date().getFullYear()
   const yearOptions = []
-  for (let y = thisYear; y >= 2023; y--) yearOptions.push(String(y))
+  for (let y = thisYear; y >= 2022; y--) yearOptions.push(String(y))
   const monthOptions = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'))
   // period（'YYYY-MM'）の分解・組立
   const splitPeriod = (p) => { const [y, m] = (p || '').split('-'); return { y: y || '', m: m || '' } }
@@ -435,6 +447,15 @@ function TeamForm({ initial, onSubmit }) {
     const cur = splitPeriod(team.history[i].period)
     const next = { ...cur, [part]: val }
     setHistory(i, 'period', (next.y && next.m) ? `${next.y}-${next.m}` : (next.y ? `${next.y}-` : (next.m ? `-${next.m}` : '')))
+  }
+
+  // 結成日の年候補（2022〜今年）と組立
+  const foundedYearOptions = []
+  for (let y = thisYear; y >= 2022; y--) foundedYearOptions.push(String(y))
+  const setFoundedPart = (part, val) => {
+    const cur = splitPeriod(team.foundedDate)
+    const next = { ...cur, [part]: val }
+    set('foundedDate', (next.y && next.m) ? `${next.y}-${next.m}` : (next.y ? `${next.y}-` : (next.m ? `-${next.m}` : '')))
   }
 
   return (
@@ -488,7 +509,20 @@ function TeamForm({ initial, onSubmit }) {
         <Label>チーム名</Label>
         <input style={{ ...inputStyle, marginBottom: '12px' }} value={team.teamName} onChange={e => set('teamName', e.target.value)} placeholder="例：Sample" />
         <Label>読み方</Label>
-        <input style={{ ...inputStyle, marginBottom: '24px' }} value={team.teamReading} onChange={e => set('teamReading', e.target.value)} placeholder="例：サンプル" />
+        <input style={{ ...inputStyle, marginBottom: '12px' }} value={team.teamReading} onChange={e => set('teamReading', e.target.value)} placeholder="例：サンプル" />
+
+        {/* 結成日 */}
+        <Label>結成日（任意）</Label>
+        <div style={{ display: 'flex', gap: '7px', marginBottom: '24px' }}>
+          <select style={{ ...smallInput, flex: 1, cursor: 'pointer', appearance: 'none' }} value={splitPeriod(team.foundedDate).y} onChange={e => setFoundedPart('y', e.target.value)}>
+            <option value="" style={{ background: '#181820' }}>年</option>
+            {foundedYearOptions.map(y => <option key={y} value={y} style={{ background: '#181820' }}>{y}年</option>)}
+          </select>
+          <select style={{ ...smallInput, flex: 1, cursor: 'pointer', appearance: 'none' }} value={splitPeriod(team.foundedDate).m} onChange={e => setFoundedPart('m', e.target.value)}>
+            <option value="" style={{ background: '#181820' }}>月</option>
+            {monthOptions.map(m => <option key={m} value={m} style={{ background: '#181820' }}>{Number(m)}月</option>)}
+          </select>
+        </div>
 
         {/* メンバー */}
         <Label>メンバー（01＝リーダー ／ 姓・名で入力）</Label>
@@ -514,7 +548,7 @@ function TeamForm({ initial, onSubmit }) {
         </div>
 
         {/* 大会履歴 */}
-        <Label>大会履歴（5件 ／ 2023年以降）</Label>
+        <Label>大会履歴（5件 ／ 2022年以降）</Label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
           {team.history.map((h, i) => (
             <div key={i} style={{ background: UI.panelBg, border: `1px solid ${UI.panelBorder}`, borderRadius: '10px', padding: '12px' }}>
