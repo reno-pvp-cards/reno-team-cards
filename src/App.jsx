@@ -142,6 +142,35 @@ function RankDiamond({ rank, size = 14 }) {
    ============================================================ */
 const loadImg = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src })
 
+// canvas描画で使う全フォント（ファミリー×ウェイト）を明示的にロード。
+// document.fonts.ready だけだと本番で初回描画時にWebフォント未着 → 標準フォントで
+// プレースホルダー（TEAM NAME 等）が描かれてしまうため、ここで確実に取得してから描画する。
+let _fontsReadyPromise = null
+async function ensureFonts() {
+  if (_fontsReadyPromise) return _fontsReadyPromise
+  _fontsReadyPromise = (async () => {
+    if (!document.fonts) return
+    // drawCard内で使用しているフォント指定をすべて網羅
+    const specs = [
+      "300 16px 'Oswald'", "400 16px 'Oswald'", "500 16px 'Oswald'",
+      "600 16px 'Oswald'", "700 16px 'Oswald'",
+      "8px 'Oswald'", "10px 'Oswald'", "11px 'Oswald'", "14px 'Oswald'",
+      "30px 'Oswald'", "36px 'Oswald'",
+      "400 16px 'Noto Sans JP'", "500 16px 'Noto Sans JP'",
+      "700 16px 'Noto Sans JP'", "900 16px 'Noto Sans JP'",
+      "11px 'Noto Sans JP'", "12px 'Noto Sans JP'",
+      "400 16px 'Saira Condensed'", "500 16px 'Saira Condensed'",
+      "600 16px 'Saira Condensed'", "700 16px 'Saira Condensed'",
+      "11px 'Saira Condensed'",
+    ]
+    try {
+      await Promise.all(specs.map(s => document.fonts.load(s)))
+    } catch (e) { /* 失敗してもreadyにフォールバック */ }
+    try { await document.fonts.ready } catch (e) {}
+  })()
+  return _fontsReadyPromise
+}
+
 async function drawCard(canvas, team) {
   const f = FACTIONS[team.faction]
   const W = CARD_W, H = CARD_H, S = CARD_SCALE
@@ -364,7 +393,7 @@ function TeamForm({ initial, onSubmit }) {
   React.useEffect(() => {
     let cancelled = false
     const run = async () => {
-      if (document.fonts && document.fonts.ready) { try { await document.fonts.ready } catch (e) {} }
+      if (document.fonts) { try { await ensureFonts() } catch (e) {} }
       if (cancelled || !previewRef.current) return
       try { await drawCard(previewRef.current, team) } catch (e) { console.error('preview render error:', e) }
     }
@@ -525,7 +554,7 @@ function CardView({ team, onEdit }) {
   const render = useCallback(async () => {
     setGenerating(true)
     try {
-      if (document.fonts && document.fonts.ready) await document.fonts.ready
+      if (document.fonts) await ensureFonts()
       const cv = document.createElement('canvas')
       await drawCard(cv, team)
       setImgSrc(cv.toDataURL('image/png'))
