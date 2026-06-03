@@ -58,13 +58,13 @@ const FACTIONS = {
   },
   umbra: {
     name: 'UMBRA', jp: 'ウンブラ', light: false,
-    accent: '#e0473d', accent2: '#ff7a6e',
-    deep: '#160606', deep2: '#0c0303',
-    panel: 'rgba(224,71,61,0.06)', panelBorder: 'rgba(224,71,61,0.24)',
-    glow: 'rgba(224,71,61,0.5)', grid: 'rgba(224,71,61,0.08)',
-    textMain: '#ff5347', textSub: 'rgba(255,120,110,0.72)', textFaint: 'rgba(255,120,110,0.32)',
+    accent: '#e5352a', accent2: '#ff6e64',
+    deep: '#080303', deep2: '#030101',
+    panel: 'rgba(229,53,42,0.07)', panelBorder: 'rgba(229,53,42,0.26)',
+    glow: 'rgba(229,53,42,0.5)', grid: 'rgba(229,53,42,0.08)',
+    textMain: '#ff5347', textSub: 'rgba(255,110,100,0.72)', textFaint: 'rgba(255,110,100,0.32)',
     cardShadow: '0 20px 60px rgba(0,0,0,0.6)',
-    veil: 'rgba(14,4,4,0.74)', veilSolid: '#0c0303',
+    veil: 'rgba(6,2,2,0.76)', veilSolid: '#030101',
   },
 }
 
