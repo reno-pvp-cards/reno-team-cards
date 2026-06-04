@@ -572,6 +572,11 @@ function TeamForm({ initial, onSubmit }) {
         </div>
 
         <button onClick={() => onSubmit(team)} style={{ width: '100%', padding: '15px', borderRadius: '10px', border: 'none', background: f.accent, color: '#fff', fontFamily: "'Oswald',sans-serif", fontSize: '16px', fontWeight: 700, letterSpacing: '0.14em', cursor: 'pointer', boxShadow: `0 8px 24px ${f.accent}44` }}>カードを生成する →</button>
+
+        {/* コピーライト表記 */}
+        <div style={{ textAlign: 'center', marginTop: '40px', fontFamily: "'Oswald',sans-serif", fontSize: '11px', letterSpacing: '0.1em', color: UI.textFaint, lineHeight: 2 }}>
+          FINAL FANTASY XIV<br />© SQUARE ENIX
+        </div>
       </div>
     </div>
   )
@@ -616,6 +621,11 @@ function CardView({ team, onEdit }) {
       <div style={{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <button onClick={onEdit} style={{ padding: '10px 22px', background: 'transparent', border: `1px solid ${UI.inputBorder}`, borderRadius: '8px', color: UI.text, fontFamily: "'Oswald',sans-serif", fontWeight: 600, fontSize: '14px', letterSpacing: '0.08em', cursor: 'pointer' }}>← 編集に戻る</button>
         <button onClick={render} disabled={generating} style={{ padding: '10px 22px', background: f.accent, border: 'none', borderRadius: '8px', color: '#fff', fontFamily: "'Oswald',sans-serif", fontWeight: 700, fontSize: '14px', letterSpacing: '0.08em', cursor: generating ? 'wait' : 'pointer', opacity: generating ? 0.6 : 1 }}>{generating ? '生成中…' : '↺ 再生成'}</button>
+      </div>
+
+      {/* コピーライト表記 */}
+      <div style={{ textAlign: 'center', marginTop: '40px', fontFamily: "'Oswald',sans-serif", fontSize: '11px', letterSpacing: '0.1em', color: UI.textFaint, lineHeight: 2 }}>
+        FINAL FANTASY XIV<br />© SQUARE ENIX
       </div>
     </div>
   )
